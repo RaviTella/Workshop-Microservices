@@ -1,0 +1,81 @@
+Install:
+Azure CLI
+Docker for windows
+Git
+
+------------------------------------------------------
+
+Create AKS cluster:
+
+az login
+az account set --subscription 
+
+az group create --name < > --location eastus
+
+az aks create --resource-group < >  --name < > --node-count 2 --enable-addons monitoring --generate-ssh-keys
+
+az aks install-cli
+
+az aks get-credentials --resource-group < > --name < >
+
+----------------------------------------------------------------------------
+
+Download Project source:
+git clone https://github.com/RaviTella/Workshop-Microservices.git
+
+----------------------------------------------------------------------------
+
+Deploy backed services:
+cd NonBlockingAsync\NetCore\eBookStore\Yaml
+kubectl apply -f  ebookstoreBackEndk8s.yaml
+
+----------------------------------------------------------------------------
+
+Scale Backend Service:
+kubectl scale  --replicas=2 deployment/recommendation-deployment
+
+----------------------------------------------------------------------------
+
+Build and run docker container for frontend app:
+
+cd  NonBlockingAsync\NetCore\eBookStore
+
+dotnet publish -c Release
+
+start windows docker in linux mode 
+
+docker build -t <Docker HUB account name>/ebookstorenetcore:latest .
+
+docker run -p 8000:80 -t <Docker HUB account name>/ebookstorenetcore:latest
+
+----------------------------------------------------------------------------
+
+Publish frontend app docker image to docker hub
+
+create docker hub account
+
+Docker login
+
+docker push <Docker HUB account name>/ebookstorenetcore:latest
+
+----------------------------------------------------------------------------
+
+Deploy the frontend app
+
+cd NonBlockingAsync\Yaml\eBookStore\aks
+
+Update the image value to <Docker HUB account name>/ebookstorenetcore:latest in ebookstoreFrontEndNetCorek8s.YAML
+
+kubectl apply -f  ebookstoreFrontEndNetCorek8s.YAML
+
+----------------------------------------------------------------------------
+
+Azure container registry
+
+create container registry
+https://docs.microsoft.com/en-us/azure/container-registry/container-registry-quickstart-task-cli
+
+Push image to registry
+cd  NonBlockingAsync\NetCore\eBookStore
+
+az acr build --image <Docker HUB account name>/ebookstorenetcore:latest --registry rtcacr --file Dockerfile . 
